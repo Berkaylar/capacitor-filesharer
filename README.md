@@ -30,9 +30,8 @@ For further details on what has changed see the [CHANGELOG](https://github.com/m
 
 | Plugin | For Capacitor | Docs                                                                                      | Notes                                                         |
 |--------|---------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| 6.x    | 6.x.x         | [README](./README.md)                                                                     | Breaking changes see Changelog.                               |
-| 5.x    | 5.x.x         | [README](https://github.com/moberwasserlechner/capacitor-filesharer/blob/5.0.0/README.md) | Breaking changes see Changelog.                               |
-| 4.x    | 4.x.x         | [README](https://github.com/moberwasserlechner/capacitor-filesharer/blob/4.0.0/README.md) | Breaking changes see Changelog.                               |
+| 7.x    | 7.x.x         | [README](./README.md)                                                                     | Breaking changes see Changelog.                               |
+| 6.x    | 6.x.x         | [README](https://github.com/moberwasserlechner/capacitor-filesharer/blob/6.0.0/README.md) | Breaking changes see Changelog.                               |
 
 ## Configuration
 
@@ -99,7 +98,7 @@ See [CHANGELOG](https://github.com/moberwasserlechner/capacitor-filesharer/blob/
 
 ## License
 
-MIT. Please see [LICENSE](https://github.com/moberwasserlechner/capacitor-filesharer/blob/main/LICENSE).
+[MIT](https://opensource.org/licenses/MIT)
 
 ## Disclaimer
 
