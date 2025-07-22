@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] - 2025-07-22
+
+### Breaking
+- Capacitor 7 is new minimum peer dependency. [#57](https://github.com/moberwasserlechner/capacitor-filesharer/issues/57)
+
 ## [6.0.0] - 2024-07-25
 
 ### Breaking
