@@ -8,10 +8,10 @@ export interface FileSharerPlugin {
 
     /**
      * Share multiple files using the native share dialog on Android and iOS and download the file on Web.
-     * @param {ShareFileOptions} options
+     * @param {ShareMultipleFileOptions} options
      * @returns {Promise<void>}
      */
-    shareMultiple(options: ShareFileOptions): Promise<void>;
+    shareMultiple(options: ShareMultipleFileOptions): Promise<void>;
 }
 
 export interface ShareFileOptions {
@@ -39,7 +39,7 @@ export interface ShareFileOptions {
          * Override the default share sheet title
          */
         chooserTitle: string;
-    }
+    };
 }
 
 export interface ShareMultipleFileOptions {
@@ -52,4 +52,3 @@ export interface ShareMultipleFileOptions {
      */
     base64DataArray: string[];
 }
-

@@ -64,12 +64,28 @@ public class FileSharerPlugin extends Plugin {
 
     @PluginMethod()
     public void shareMultiple(PluginCall call) {
-        JSArray files = call.getArray("files");
+        JSArray filenameArray = call.getArray("filenameArray");
+        JSArray base64DataArray = call.getArray("base64DataArray");
         String dialogTitle = call.getString("dialogTitle", "Share");
 
-        Intent intent = new Intent(files != null && files.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
+        if (filenameArray == null || filenameArray.length() == 0) {
+            call.reject(ERR_PARAM_NO_FILENAME);
+            return;
+        }
 
-        shareMultipleFiles(files, intent, call);
+        if (base64DataArray == null || base64DataArray.length() == 0) {
+            call.reject(ERR_PARAM_NO_DATA);
+            return;
+        }
+
+        if (filenameArray.length() != base64DataArray.length()) {
+            call.reject("ERR_PARAM_ARRAY_LENGTH_MISMATCH");
+            return;
+        }
+
+        Intent intent = new Intent(filenameArray.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
+
+        shareMultipleFiles(filenameArray, base64DataArray, intent, call);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, new Intent(Intent.EXTRA_CHOSEN_COMPONENT), flags);
@@ -83,16 +99,34 @@ public class FileSharerPlugin extends Plugin {
         call.resolve();
     }
 
-    private void shareMultipleFiles(JSArray files, Intent intent, PluginCall call) {
-        List<Object> filesList;
+    private void shareMultipleFiles(JSArray filenameArray, JSArray base64DataArray, Intent intent, PluginCall call) {
         ArrayList<Uri> fileUris = new ArrayList<>();
         try {
-            filesList = files.toList();
-            for (int i = 0; i < filesList.size(); i++) {
-                String file = (String) filesList.get(i);
+            List<Object> filenameList = filenameArray.toList();
+            List<Object> base64DataList = base64DataArray.toList();
+            
+            for (int i = 0; i < filenameList.size(); i++) {
+                String filename = (String) filenameList.get(i);
+                String base64Data = (String) base64DataList.get(i);
 
-                String type = getMimeType(file);
-                if (type == null || filesList.size() > 1) {
+                // Save the file to cache
+                File cachedFile = new File(getCacheDir(), filename);
+                try (FileOutputStream fos = new FileOutputStream(cachedFile)) {
+                    byte[] decodedData = Base64.decode(base64Data, Base64.DEFAULT);
+                    fos.write(decodedData);
+                    fos.flush();
+                } catch (IOException e) {
+                    Log.e(getLogTag(), e.getMessage());
+                    call.reject(ERR_FILE_CACHING_FAILED);
+                    return;
+                } catch (IllegalArgumentException e) {
+                    Log.e(getLogTag(), e.getMessage());
+                    call.reject(ERR_PARAM_DATA_INVALID);
+                    return;
+                }
+
+                String type = getMimeType(filename);
+                if (type == null || filenameList.size() > 1) {
                     type = "*/*";
                 }
                 intent.setType(type);
@@ -100,12 +134,13 @@ public class FileSharerPlugin extends Plugin {
                 Uri fileUrl = FileProvider.getUriForFile(
                     getContext(),
                     getContext().getPackageName() + ".fileprovider",
-                    new File(Uri.parse(file).getPath())
+                    cachedFile
                 );
                 fileUris.add(fileUrl);
             }
+            
             if (fileUris.size() > 1) {
-                intent.putExtra(Intent.EXTRA_STREAM, fileUris);
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, fileUris);
             } else if (fileUris.size() == 1) {
                 intent.putExtra(Intent.EXTRA_STREAM, fileUris.get(0));
             }
