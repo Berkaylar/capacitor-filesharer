@@ -1,75 +1,74 @@
 {
-  "name": "@byteowls/capacitor-filesharer",
-  "version": "7.0.1",
-  "description": "Capacitor plugin to download and share files for the Web, Android and iOS",
-  "author": "Michael Oberwasserlechner",
-  "homepage": "https://github.com/moberwasserlechner/capacitor-filesharer",
-  "license": "MIT",
-  "main": "dist/esm/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
-  "scripts": {
-    "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
-    "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
-    "verify:android": "cd android && ./gradlew clean build test && cd ..",
-    "verify:web": "npm run build",
-    "build": "npm run clean && tsc",
-    "clean": "rimraf ./dist",
-    "watch": "tsc --watch",
-    "test": "jest",
-    "removePacked": "rimraf -g byteowls-capacitor-filesharer-*.tgz",
-    "publishLocally": "npm run removePacked && npm run build && npm pack",
-    "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
-  },
-  "files": [
-    "android/src/main/",
-    "android/build.gradle",
-    "dist/",
-    "ios/ByteowlsCapacitorFilesharer/Source",
-    "ByteowlsCapacitorFilesharer.podspec"
-  ],
-  "keywords": [
-    "capacitor",
-    "capacitor-plugin",
-    "share",
-    "files",
-    "filesharer"
-  ],
-  "capacitor": {
-    "ios": {
-      "src": "ios"
+    "name": "@byteowls/capacitor-filesharer",
+    "version": "7.0.0",
+    "description": "Capacitor plugin to download and share files for the Web, Android and iOS",
+    "author": "Michael Oberwasserlechner",
+    "homepage": "https://github.com/moberwasserlechner/capacitor-filesharer",
+    "license": "MIT",
+    "main": "dist/esm/index.js",
+    "module": "dist/esm/index.js",
+    "types": "dist/esm/index.d.ts",
+    "scripts": {
+        "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
+        "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
+        "verify:android": "cd android && ./gradlew clean build test && cd ..",
+        "verify:web": "npm run build",
+        "build": "npm run clean && tsc",
+        "clean": "rimraf ./dist",
+        "watch": "tsc --watch",
+        "test": "jest",
+        "removePacked": "rimraf -g byteowls-capacitor-filesharer-*.tgz",
+        "publishLocally": "npm run removePacked && npm run build && npm pack",
+        "prepublishOnly": "npm run build"
     },
-    "android": {
-      "src": "android"
+    "files": [
+        "android/src/main/",
+        "android/build.gradle",
+        "dist/",
+        "ios/ByteowlsCapacitorFilesharer/Source",
+        "ByteowlsCapacitorFilesharer.podspec"
+    ],
+    "keywords": [
+        "capacitor",
+        "capacitor-plugin",
+        "share",
+        "files",
+        "filesharer"
+    ],
+    "capacitor": {
+        "ios": {
+            "src": "ios"
+        },
+        "android": {
+            "src": "android"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/moberwasserlechner/capacitor-filesharer"
+    },
+    "bugs": {
+        "url": "https://github.com/moberwasserlechner/capacitor-filesharer/issues"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "peerDependencies": {
+        "@capacitor/core": ">=7.0.0"
+    },
+    "dependencies": {
+        "file-saver": "2.0.5"
+    },
+    "devDependencies": {
+        "@capacitor/android": "^7.0.0",
+        "@capacitor/core": "^7.0.0",
+        "@capacitor/ios": "^7.0.0",
+        "@types/file-saver": "2.0.7",
+        "@types/jest": "30.0.0",
+        "eslint": "9.7.0",
+        "jest": "30.0.5",
+        "rimraf": "6.0.1",
+        "ts-jest": "29.4.0",
+        "typescript": "5.8.3"
     }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/moberwasserlechner/capacitor-filesharer"
-  },
-  "bugs": {
-    "url": "https://github.com/moberwasserlechner/capacitor-filesharer/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "peerDependencies": {
-    "@capacitor/core": ">=7.0.0"
-  },
-  "dependencies": {
-    "file-saver": "2.0.5"
-  },
-  "devDependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/ios": "^7.0.0",
-    "@types/file-saver": "2.0.7",
-    "@types/jest": "30.0.0",
-    "eslint": "9.7.0",
-    "jest": "30.0.5",
-    "rimraf": "6.0.1",
-    "ts-jest": "29.4.0",
-    "typescript": "5.8.3"
-  }
 }

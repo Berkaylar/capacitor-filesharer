@@ -44,11 +44,15 @@ export interface ShareFileOptions {
 
 export interface ShareMultipleFileOptions {
     /**
-     * The filename with a extension.
+     * Array of file URIs or file paths to share
      */
-    filenameArray: string[];
+    files: string[];
     /**
-     * The base64 encoded data.
+     * The content type of the files (optional)
      */
-    base64DataArray: string[];
+    contentType?: string;
+    /**
+     * Dialog title for the share chooser (optional)
+     */
+    dialogTitle?: string;
 }

@@ -64,28 +64,18 @@ public class FileSharerPlugin extends Plugin {
 
     @PluginMethod()
     public void shareMultiple(PluginCall call) {
-        JSArray filenameArray = call.getArray("filenameArray");
-        JSArray base64DataArray = call.getArray("base64DataArray");
+        JSArray files = call.getArray("files");
         String dialogTitle = call.getString("dialogTitle", "Share");
+        String contentType = call.getString("contentType", "*/*");
 
-        if (filenameArray == null || filenameArray.length() == 0) {
+        if (files == null || files.length() == 0) {
             call.reject(ERR_PARAM_NO_FILENAME);
             return;
         }
 
-        if (base64DataArray == null || base64DataArray.length() == 0) {
-            call.reject(ERR_PARAM_NO_DATA);
-            return;
-        }
+        Intent intent = new Intent(files.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
 
-        if (filenameArray.length() != base64DataArray.length()) {
-            call.reject("ERR_PARAM_ARRAY_LENGTH_MISMATCH");
-            return;
-        }
-
-        Intent intent = new Intent(filenameArray.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
-
-        shareMultipleFiles(filenameArray, base64DataArray, intent, call);
+        shareMultipleFiles(files, intent, call, contentType);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, new Intent(Intent.EXTRA_CHOSEN_COMPONENT), flags);
@@ -99,45 +89,36 @@ public class FileSharerPlugin extends Plugin {
         call.resolve();
     }
 
-    private void shareMultipleFiles(JSArray filenameArray, JSArray base64DataArray, Intent intent, PluginCall call) {
+    private void shareMultipleFiles(JSArray files, Intent intent, PluginCall call, String contentType) {
         ArrayList<Uri> fileUris = new ArrayList<>();
         try {
-            List<Object> filenameList = filenameArray.toList();
-            List<Object> base64DataList = base64DataArray.toList();
+            List<Object> filesList = files.toList();
             
-            for (int i = 0; i < filenameList.size(); i++) {
-                String filename = (String) filenameList.get(i);
-                String base64Data = (String) base64DataList.get(i);
+            for (int i = 0; i < filesList.size(); i++) {
+                String filePath = (String) filesList.get(i);
+                Uri fileUri;
 
-                // Save the file to cache
-                File cachedFile = new File(getCacheDir(), filename);
-                try (FileOutputStream fos = new FileOutputStream(cachedFile)) {
-                    byte[] decodedData = Base64.decode(base64Data, Base64.DEFAULT);
-                    fos.write(decodedData);
-                    fos.flush();
-                } catch (IOException e) {
-                    Log.e(getLogTag(), e.getMessage());
-                    call.reject(ERR_FILE_CACHING_FAILED);
-                    return;
-                } catch (IllegalArgumentException e) {
-                    Log.e(getLogTag(), e.getMessage());
-                    call.reject(ERR_PARAM_DATA_INVALID);
-                    return;
+                // Check if it's already a URI or a file path
+                if (filePath.startsWith("content://") || filePath.startsWith("file://")) {
+                    fileUri = Uri.parse(filePath);
+                } else {
+                    // It's a file path, create a File and get URI from FileProvider
+                    File file = new File(filePath);
+                    if (!file.exists()) {
+                        call.reject("File not found: " + filePath);
+                        return;
+                    }
+                    fileUri = FileProvider.getUriForFile(
+                        getContext(),
+                        getContext().getPackageName() + ".fileprovider",
+                        file
+                    );
                 }
-
-                String type = getMimeType(filename);
-                if (type == null || filenameList.size() > 1) {
-                    type = "*/*";
-                }
-                intent.setType(type);
-
-                Uri fileUrl = FileProvider.getUriForFile(
-                    getContext(),
-                    getContext().getPackageName() + ".fileprovider",
-                    cachedFile
-                );
-                fileUris.add(fileUrl);
+                fileUris.add(fileUri);
             }
+            
+            // Set content type
+            intent.setType(contentType);
             
             if (fileUris.size() > 1) {
                 intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, fileUris);
