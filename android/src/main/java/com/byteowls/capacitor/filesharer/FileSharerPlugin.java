@@ -65,17 +65,28 @@ public class FileSharerPlugin extends Plugin {
     @PluginMethod()
     public void shareMultiple(PluginCall call) {
         JSArray files = call.getArray("files");
+        JSArray filenameArray = call.getArray("filenameArray");
+        JSArray base64DataArray = call.getArray("base64DataArray");
         String dialogTitle = call.getString("dialogTitle", "Share");
+        JSArray contentTypeArray = call.getArray("contentType");
         String contentType = call.getString("contentType", "*/*");
 
-        if (files == null || files.length() == 0) {
+        Intent intent;
+
+        // Check if using files format (for already saved files)
+        if (files != null && files.length() > 0) {
+            intent = new Intent(files.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
+            shareMultipleFiles(files, intent, call, contentType, contentTypeArray);
+        }
+        // Check if using filenameArray/base64DataArray format (for base64 data)
+        else if (filenameArray != null && base64DataArray != null && 
+                 filenameArray.length() > 0 && base64DataArray.length() > 0) {
+            intent = new Intent(filenameArray.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
+            shareMultipleBase64Files(filenameArray, base64DataArray, intent, call, contentType, contentTypeArray);
+        } else {
             call.reject(ERR_PARAM_NO_FILENAME);
             return;
         }
-
-        Intent intent = new Intent(files.length() > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
-
-        shareMultipleFiles(files, intent, call, contentType);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, new Intent(Intent.EXTRA_CHOSEN_COMPONENT), flags);
@@ -89,10 +100,11 @@ public class FileSharerPlugin extends Plugin {
         call.resolve();
     }
 
-    private void shareMultipleFiles(JSArray files, Intent intent, PluginCall call, String contentType) {
+    private void shareMultipleFiles(JSArray files, Intent intent, PluginCall call, String contentType, JSArray contentTypeArray) {
         ArrayList<Uri> fileUris = new ArrayList<>();
         try {
             List<Object> filesList = files.toList();
+            List<Object> contentTypeList = contentTypeArray != null ? contentTypeArray.toList() : null;
             
             for (int i = 0; i < filesList.size(); i++) {
                 String filePath = (String) filesList.get(i);
@@ -117,8 +129,70 @@ public class FileSharerPlugin extends Plugin {
                 fileUris.add(fileUri);
             }
             
-            // Set content type
-            intent.setType(contentType);
+            // Set content type - use array if available, otherwise use single contentType
+            if (contentTypeList != null && contentTypeList.size() > 0) {
+                // Use the first content type from the array, or "*/*" if multiple files
+                String firstContentType = (String) contentTypeList.get(0);
+                intent.setType(filesList.size() > 1 ? "*/*" : firstContentType);
+            } else {
+                intent.setType(contentType);
+            }
+            
+            if (fileUris.size() > 1) {
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, fileUris);
+            } else if (fileUris.size() == 1) {
+                intent.putExtra(Intent.EXTRA_STREAM, fileUris.get(0));
+            }
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ex) {
+            call.reject(ex.getLocalizedMessage());
+            return;
+        }
+    }
+
+    private void shareMultipleBase64Files(JSArray filenameArray, JSArray base64DataArray, Intent intent, PluginCall call, String contentType, JSArray contentTypeArray) {
+        ArrayList<Uri> fileUris = new ArrayList<>();
+        try {
+            List<Object> filenameList = filenameArray.toList();
+            List<Object> base64DataList = base64DataArray.toList();
+            List<Object> contentTypeList = contentTypeArray != null ? contentTypeArray.toList() : null;
+            
+            for (int i = 0; i < filenameList.size(); i++) {
+                String filename = (String) filenameList.get(i);
+                String base64Data = (String) base64DataList.get(i);
+
+                // Save the file to cache
+                File cachedFile = new File(getCacheDir(), filename);
+                try (FileOutputStream fos = new FileOutputStream(cachedFile)) {
+                    byte[] decodedData = Base64.decode(base64Data, Base64.DEFAULT);
+                    fos.write(decodedData);
+                    fos.flush();
+                } catch (IOException e) {
+                    Log.e(getLogTag(), e.getMessage());
+                    call.reject(ERR_FILE_CACHING_FAILED);
+                    return;
+                } catch (IllegalArgumentException e) {
+                    Log.e(getLogTag(), e.getMessage());
+                    call.reject(ERR_PARAM_DATA_INVALID);
+                    return;
+                }
+
+                Uri fileUrl = FileProvider.getUriForFile(
+                    getContext(),
+                    getContext().getPackageName() + ".fileprovider",
+                    cachedFile
+                );
+                fileUris.add(fileUrl);
+            }
+            
+            // Set content type - use array if available, otherwise use single contentType
+            if (contentTypeList != null && contentTypeList.size() > 0) {
+                // Use the first content type from the array, or "*/*" if multiple files
+                String firstContentType = (String) contentTypeList.get(0);
+                intent.setType(filenameList.size() > 1 ? "*/*" : firstContentType);
+            } else {
+                intent.setType(contentType);
+            }
             
             if (fileUris.size() > 1) {
                 intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, fileUris);
