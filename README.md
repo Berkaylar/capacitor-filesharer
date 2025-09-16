@@ -1,26 +1,39 @@
-# Capacitor plugin for file sharing
+<p align="center"><br><img src="https://user-images.githubusercontent.com/236501/85893648-1c92e880-b7a8-11ea-926d-95355b8175c7.png" width="128" height="128" /></p>
+<h3 align="center">File Sharing</h3>
+<p align="center"><strong><code>@byteowls/capacitor-filesharer</code></strong></p>
+<p align="center">
+    Capacitor File Sharing plugin
+</p>
 
-[![npm](https://img.shields.io/npm/v/@byteowls/capacitor-filesharer.svg)](https://www.npmjs.com/package/@byteowls/capacitor-filesharer)
-[![npm](https://img.shields.io/npm/dt/@byteowls/capacitor-filesharer.svg?label=npm%20downloads)](https://www.npmjs.com/package/@byteowls/capacitor-filesharer)
-[![Twitter Follow](https://img.shields.io/twitter/follow/michaelowl_web.svg?style=social&label=Follow&style=flat-square)](https://twitter.com/michaelowl_web)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/moberwasserlechner)
+<p align="center">
+    <img src="https://img.shields.io/maintenance/yes/2024?style=flat-square" />
+    <a href="https://github.com/moberwasserlechner/capacitor-filesharer/actions?query=workflow%3ACI"><img src="https://img.shields.io/github/actions/workflow/status/moberwasserlechner/capacitor-filesharer/ci.yml?style=flat-square" /></a>
+    <a href="https://www.npmjs.com/package/@byteowls/capacitor-filesharer"><img src="https://img.shields.io/npm/l/@byteowls/capacitor-filesharer?style=flat-square" /></a>
+<br>
+  <a href="https://www.npmjs.com/package/@byteowls/capacitor-filesharer"><img src="https://img.shields.io/npm/dw/@byteowls/capacitor-filesharer?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/@byteowls/capacitor-filesharer"><img src="https://img.shields.io/npm/v/@byteowls/capacitor-filesharer?style=flat-square" /></a>
+</p>
 
+## Introduction
 
+Capacitor plugin to share files on Android and iOS using the native share dialog and on Web using the FileSaver lib.
 ## Installation
 
-`npm i @byteowls/capacitor-filesharer`
+```bash
+npm i @byteowls/capacitor-filesharer
+npx cap sync
+```
 
-Minimum Capacitor version is **2.0.0**
+For further details on what has changed see the [CHANGELOG](https://github.com/moberwasserlechner/capacitor-filesharer/blob/main/CHANGELOG.md).
+
+## Versions
+
+| Plugin | For Capacitor | Docs                                                                                      | Notes                                                         |
+|--------|---------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| 7.x    | 7.x.x         | [README](./README.md)                                                                     | Breaking changes see Changelog.                               |
+| 6.x    | 6.x.x         | [README](https://github.com/moberwasserlechner/capacitor-filesharer/blob/6.0.0/README.md) | Breaking changes see Changelog.                               |
 
 ## Configuration
-
-This example shows the common process of configuring this plugin.
-
-Although it was taken from a Angular 6 application, it should work in other frameworks as well.
-
-
-
-### Use it
 
 ```typescript
 import {
@@ -34,8 +47,11 @@ export class SignupComponent {
     downloadButtonClick() {
         FileSharer.share({
             filename: "test.pdf",
-            base64Data: "...",
             contentType: "application/pdf",
+            // If you want to save base64:
+            base64Data: "...",
+            // If you want to save a file from a path:
+            path: "../../file.pdf",
         }).then(() => {
             // do sth
         }).catch(error => {
@@ -53,61 +69,37 @@ export class SignupComponent {
 * ERR_PARAM_DATA_INVALID ... Base64 data is invalid. See [this comment](https://github.com/moberwasserlechner/capacitor-filesharer/issues/5#issuecomment-502070959) for a possible error.
 * ERR_FILE_CACHING_FAILED ... Caching the file in temp directory on the device failed.
 
-## Platform: Web/PWA
-
-No further config is needed.
-
 ## Platform: Android
 
-**Register the plugin** in `com.companyname.appname.MainActivity#onCreate`
+Add `outState.clear()` to your `MainActivity`. This fixes `android.os.TransactionTooLargeException` when sharing larger files.
 
-```
-import com.byteowls.capacitor.filesharer.FileSharerPlugin;
+```java
+package com.company.project;
 
+import android.os.Bundle;
+import com.getcapacitor.BridgeActivity;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+public class MainActivity extends BridgeActivity {
 
-        List<Class<? extends Plugin>> additionalPlugins = new ArrayList<>();
-        // Additional plugins you've installed go here
-        // Ex: additionalPlugins.add(TotallyAwesomePlugin.class);
-        additionalPlugins.add(FileSharerPlugin.class);
-
-        // Initializes the Bridge
-        this.init(savedInstanceState, additionalPlugins);
-    }
-```
-
-Override the onSaveInstanceState on the main activity to avoid an issue that results in !!! FAILED BINDER TRANSACTION !!! errors when dealing with larger files ([Related issue](https://github.com/moberwasserlechner/capacitor-filesharer/issues/13))
-
-```
   @Override
   public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     outState.clear();
   }
+}
 ```
-
-## Platform: iOS
-
-No further config is needed. On iOS the plugin is registered automatically by Capacitor.
-
-## Platform: Electron
-
-- No timeline.
 
 ## Contribute
 
-See [Contribution Guidelines](https://github.com/moberwasserlechner/capacitor-filesharer/blob/master/.github/CONTRIBUTING.md).
+See [Contribution Guidelines](https://github.com/moberwasserlechner/capacitor-filesharer/blob/main/.github/CONTRIBUTING.md).
 
 ## Changelog
-See [CHANGELOG](https://github.com/moberwasserlechner/capacitor-filesharer/blob/master/CHANGELOG.md).
+See [CHANGELOG](https://github.com/moberwasserlechner/capacitor-filesharer/blob/main/CHANGELOG.md).
 
 ## License
 
-MIT. Please see [LICENSE](https://github.com/moberwasserlechner/capacitor-filesharer/blob/master/LICENSE).
+[MIT](https://opensource.org/licenses/MIT)
 
-## BYTEOWLS Software & Consulting
+## Disclaimer
 
-This plugin is powered by [BYTEOWLS Software & Consulting](https://byteowls.com) and was build for [Team Conductor](https://team-conductor.com/en/) - Next generation club management platform.
+We have no business relation to Ionic.

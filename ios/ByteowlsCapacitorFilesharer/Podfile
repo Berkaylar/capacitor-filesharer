@@ -1,5 +1,6 @@
+require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 # Uncomment the next line to define a global platform for your project
-platform :ios, '12.0'
+platform :ios, '14.0'
 
 target 'ByteowlsCapacitorFilesharer' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
@@ -8,4 +9,8 @@ target 'ByteowlsCapacitorFilesharer' do
   # Pods for ByteowlsCapacitorFilesharer
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
 
+end
+
+post_install do |installer|
+  assertDeploymentTarget(installer)
 end
